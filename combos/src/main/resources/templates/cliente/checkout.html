@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago - JVXF Boutique</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <style>
+        .qr-img { max-width: 150px; display: block; margin: 10px auto; }
+        #mapaSeleccion { height: 350px; border-radius: 12px; }
+    </style>
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+    <nav class="navbar bg-white shadow-sm mb-5 py-3">
+        <div class="container d-flex justify-content-center">
+            <a class="navbar-brand fw-bold text-dark fs-3" th:href="@{/}">
+                <i class="bi bi-shield-lock-fill text-success"></i> Pago Seguro - JVXF Boutique
+            </a>
+        </div>
+    </nav>
+
+    <div class="container pb-5 flex-grow-1">
+        <div class="mb-4">
+            <a th:href="@{/carrito/ver}" class="text-decoration-none text-dark fw-bold">
+                <i class="bi bi-arrow-left"></i> Volver al Carrito
+            </a>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <div class="row g-5">
+            <div class="col-lg-7">
+                <form th:action="@{/carrito/procesar}" method="POST">
+                    <div class="card border-0 shadow-sm p-4 mb-4">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-person-badge"></i> 1. Datos de Contacto</h5>
+
+                        <div th:if="${nombreAutocompletado}" class="alert alert-light border small mb-3">
+                            <i class="bi bi-person-check text-success"></i>
+                            Hola de nuevo, <strong th:text="${nombreAutocompletado}"></strong>. Ya completamos tus datos.
+                        </div>
+                        <div th:unless="${nombreAutocompletado}" class="small text-muted mb-3">
+                            ¿Ya tienes cuenta? <a th:href="@{/login}">Inicia sesión</a> para no volver a escribir tus datos.
+                            ¿Primera vez? <a th:href="@{/registro}">Regístrate</a> (opcional).
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6"><label class="form-label fw-bold">Nombre Completo</label><input type="text" id="inputNombre" class="form-control" name="nombre" th:value="${nombreAutocompletado}" required></div>
+                            <div class="col-md-6"><label class="form-label fw-bold">Correo Electrónico</label><input type="email" class="form-control" name="email" th:value="${emailAutocompletado}" required></div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Dirección de entrega</label>
+                                <div class="input-group mb-2">
+                                    <input type="text" id="inputDireccion" class="form-control" name="direccion" placeholder="Av. Ejemplo 123, Distrito, Ciudad" required>
+                                    <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#modalMapa">
+                                        <i class="bi bi-geo-alt-fill"></i> Elegir en el mapa
+                                    </button>
+                                </div>
+                                <small id="coordsSeleccionadas" class="text-muted"></small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm p-4 mb-4">
+                        <h5 class="fw-bold mb-4"><i class="bi bi-wallet2"></i> 2. Método de Pago</h5>
+                        
+                        <div class="form-check border rounded p-3 mb-3 bg-white" onclick="mostrarPago('tarjeta')">
+                            <input class="form-check-input ms-1" type="radio" name="metodoPago" id="radioTarjeta" value="Tarjeta" checked>
+                            <label class="form-check-label ms-2 w-100 fw-bold" style="cursor: pointer;">Tarjeta de Crédito / Débito</label>
+                            <div id="formTarjeta" class="mt-3">
+                                <input type="text" class="form-control mb-2" placeholder="Número de tarjeta">
+                                <div class="row g-2"><div class="col-6"><input type="text" class="form-control" placeholder="MM/AA"></div><div class="col-6"><input type="text" class="form-control" placeholder="CVV"></div></div>
+                            </div>
+                        </div>
+
+                        <div class="form-check border rounded p-3 bg-white" onclick="mostrarPago('billetera')">
+                            <input class="form-check-input ms-1" type="radio" name="metodoPago" id="radioBilletera" value="Billetera Digital">
+                            <label class="form-check-label ms-2 fw-bold w-100" style="cursor: pointer;">Pago con Yape / Plin</label>
+                            <div id="formBilletera" class="mt-3 text-center d-none border-top pt-3">
+                                <select class="form-select form-select-sm mb-2" onchange="cambiarQR(this.value)">
+                                    <option value="">Selecciona tu app...</option>
+                                    <option value="yape">Yape</option>
+                                    <option value="plin">Plin</option>
+                                </select>
+                                <img th:src="@{/img/yape.png}" id="qrYape" class="qr-img border p-1 rounded d-none" alt="QR Yape">
+                                <img th:src="@{/img/plin.png}" id="qrPlin" class="qr-img border p-1 rounded d-none" alt="QR Plin">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-dark btn-lg w-100 py-3 fw-bold shadow">Confirmar y Generar Boleta</button>
+                </form>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm p-4 bg-white sticky-top" style="top: 20px;">
+                    <h5 class="fw-bold mb-4">Resumen de tu Orden</h5>
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3" th:each="detalle : ${detalles}">
+                            <span th:text="${detalle.producto.nombre}"></span>
+                            <span class="text-muted" th:text="'S/ ' + ${#numbers.formatDecimal(detalle.precioUnitario * detalle.cantidad, 1, 2)}"></span>
+                        </li>
+                    </ul>
+                    <div class="d-flex justify-content-between align-items-center"><h4 class="fw-bold">Total</h4><h2 class="fw-bold text-success" th:text="'S/ ' + ${#numbers.formatDecimal(total, 1, 2)}"></h2></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function mostrarPago(metodo) {
+            document.getElementById('formTarjeta').classList.toggle('d-none', metodo !== 'tarjeta');
+            document.getElementById('formBilletera').classList.toggle('d-none', metodo !== 'billetera');
+            
+            if(metodo === 'tarjeta') {
+                document.getElementById('radioTarjeta').checked = true;
+            } else if(metodo === 'billetera') {
+                document.getElementById('radioBilletera').checked = true;
+            }
+        }
+
+        function cambiarQR(app) {
+            document.getElementById('qrYape').classList.add('d-none');
+            document.getElementById('qrPlin').classList.add('d-none');
+            
+            const radioBilletera = document.getElementById('radioBilletera');
+            
+            if(app === 'yape') {
+                document.getElementById('qrYape').classList.remove('d-none');
+                radioBilletera.value = 'Yape'; // Envía "Yape" a la base de datos
+            } else if(app === 'plin') {
+                document.getElementById('qrPlin').classList.remove('d-none');
+                radioBilletera.value = 'Plin'; // Envía "Plin" a la base de datos
+            } else {
+                radioBilletera.value = 'Billetera Digital';
+            }
+        }
+    </script>
+
+    <!-- Modal del selector de mapa -->
+    <div class="modal fade" id="modalMapa" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-geo-alt-fill"></i> Elige tu ubicación de entrega</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small">Mueve el mapa y haz clic (o toca) en el punto exacto donde quieres recibir tu pedido.</p>
+                    <div id="mapaSeleccion"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-dark fw-bold" data-bs-dismiss="modal" onclick="confirmarUbicacion()">Usar esta ubicación</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let mapa, marcador;
+        let ubicacionSeleccionada = null;
+
+        // Fijamos explícitamente los íconos del marcador (por CDN a veces no se resuelven solos)
+        L.Icon.Default.mergeOptions({
+            iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+            iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+        });
+
+        // Inicializamos el mapa centrado en Lima solo la primera vez que se abre el modal
+        // (Leaflet necesita que el contenedor ya sea visible para calcular su tamaño bien).
+        document.getElementById('modalMapa').addEventListener('shown.bs.modal', function () {
+            if (!mapa) {
+                mapa = L.map('mapaSeleccion').setView([-12.0464, -77.0428], 13); // Lima, Perú
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(mapa);
+
+                mapa.on('click', function (e) {
+                    colocarMarcador(e.latlng.lat, e.latlng.lng);
+                });
+
+                // Si el navegador nos deja, centramos en la ubicación real del cliente
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(pos => {
+                        mapa.setView([pos.coords.latitude, pos.coords.longitude], 15);
+                    });
+                }
+            } else {
+                mapa.invalidateSize(); // por si el modal cambió de tamaño desde la última vez
+            }
+        });
+
+        function colocarMarcador(lat, lng) {
+            if (marcador) mapa.removeLayer(marcador);
+            marcador = L.marker([lat, lng]).addTo(mapa);
+            ubicacionSeleccionada = { lat, lng };
+
+            // Reverse geocoding gratuito (Nominatim/OpenStreetMap) para convertir
+            // las coordenadas en una dirección legible.
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.display_name) {
+                        ubicacionSeleccionada.direccionTexto = data.display_name;
+                    }
+                })
+                .catch(() => {}); // si falla, igual dejamos las coordenadas guardadas
+        }
+
+        function confirmarUbicacion() {
+            if (!ubicacionSeleccionada) return;
+
+            const input = document.getElementById('inputDireccion');
+            const coordsTexto = `(Ubicación en mapa: ${ubicacionSeleccionada.lat.toFixed(5)}, ${ubicacionSeleccionada.lng.toFixed(5)})`;
+
+            if (ubicacionSeleccionada.direccionTexto) {
+                input.value = ubicacionSeleccionada.direccionTexto + ' ' + coordsTexto;
+            } else if (!input.value.trim()) {
+                input.value = coordsTexto;
+            }
+
+            document.getElementById('coordsSeleccionadas').textContent = '📍 Ubicación seleccionada en el mapa';
+        }
+    </script>
+</body>
+</html>

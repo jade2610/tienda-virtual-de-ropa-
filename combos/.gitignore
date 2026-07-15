@@ -1,0 +1,17 @@
+# Compilado / build
+target/
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# Logs
+*.log
+
+# Variables de entorno locales (si algún día usas un .env)
+.env

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Ventas - JVXF Boutique</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <link rel="stylesheet" th:href="@{/css/styles.css?v=1.1}">
+    
+    <style>
+        .sidebar { width: 260px; height: 100vh; position: fixed; top: 0; left: 0; background-color: #2C1A17; border-right: 3px solid #B23A48; padding-top: 20px; z-index: 1000; }
+        .main-content { margin-left: 260px; padding: 40px; width: calc(100% - 260px); }
+        .sidebar .nav-link { color: #FCF9F2 !important; padding: 15px 25px; border-radius: 0; font-weight: 400; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { background-color: #B23A48; color: white !important; transform: none; }
+    </style>
+</head>
+<body class="bg-light">
+
+    <div class="sidebar">
+        <div class="text-center pb-4 mb-4 border-bottom" style="border-color: rgba(240, 213, 215, 0.2) !important;">
+            <h4 class="fw-bold mb-0 text-white" style="letter-spacing: 1px;">JVXF Panel</h4>
+            <small class="text-muted fw-bold">ADMINISTRADOR</small>
+        </div>
+        <ul class="nav flex-column fs-6">
+            <li class="nav-item"><a class="nav-link" th:href="@{/admin/dashboard}"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/productos}"><i class="bi bi-cloth-card me-2"></i> Ver Inventario</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/productos/nuevo}"><i class="bi bi-plus-circle me-2"></i> Registrar Ropa</a></li>
+            <li class="nav-item"><a class="nav-link active" th:href="@{/ventas}"><i class="bi bi-receipt me-2"></i> Historial Ventas</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/clientes}"><i class="bi bi-people me-2"></i> Base Clientes</a></li>
+            <li class="nav-item mt-5 border-top" style="border-color: rgba(240, 213, 215, 0.2) !important;"><a class="nav-link text-warning" th:href="@{/}"><i class="bi bi-box-arrow-left me-2"></i> Salir al Catálogo</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        
+        <div class="mb-4">
+            <h2 class="fw-bold" style="color: #422A26;">Historial de Transacciones</h2>
+            <p class="text-muted">Revisa todos los comprobantes y pagos procesados en la tienda.</p>
+        </div>
+
+        <div class="card border-0 shadow-sm p-4 bg-white">
+            
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+                <h5 class="fw-bold mb-0" style="color: #422A26;"><i class="bi bi-list-check text-warning me-2"></i> Últimas Ventas</h5>
+                <button class="btn btn-sm btn-outline-dark fw-bold" onclick="exportarExcel()"><i class="bi bi-download"></i> Exportar a Excel</button>
+            </div>
+
+            <div class="d-flex flex-wrap gap-3 mb-3">
+                <div class="input-group" style="max-width: 320px;">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" id="buscadorVentas" class="form-control" placeholder="Buscar por cliente, correo o N° de pedido..." oninput="filtrarVentas()">
+                </div>
+                <select id="filtroEstadoVentas" class="form-select" style="max-width: 200px;" onchange="filtrarVentas()">
+                    <option value="todos">Estado: Todos</option>
+                    <option value="PENDIENTE">Pendiente</option>
+                    <option value="ENVIADO">Enviado</option>
+                    <option value="ENTREGADO">Entregado</option>
+                    <option value="CANCELADO">Cancelado</option>
+                </select>
+            </div>
+
+            <div class="table-responsive">
+                <table id="tablaVentas" class="table table-hover align-middle">
+                    <thead class="table-light text-muted small uppercase">
+                        <tr>
+                            <th>N° Pedido</th>
+                            <th>Fecha y Hora</th>
+                            <th>Cliente</th>
+                            <th>Método</th>
+                            <th>Total</th>
+                            <th class="text-center">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoVentas">
+                        <tr th:each="venta : ${listaVentas}" class="fila-venta"
+                            th:data-cliente="${(venta.cliente.nombre ?: '') + ' ' + (venta.cliente.email ?: '')}"
+                            th:data-pedido="${venta.id}"
+                            th:data-estado="${venta.estado}">
+                            <td class="fw-bold text-dark" th:text="'#' + ${venta.id}">#1024</td>
+                            
+                            <td class="text-muted small" th:text="${#temporals.format(venta.fecha, 'dd/MM/yyyy HH:mm')}">09/06/2026 14:30</td>
+                            
+                            <td>
+                                <p class="mb-0 fw-bold" style="color: #422A26;" th:text="${venta.cliente.nombre}">Nombre Cliente</p>
+                                <small class="text-muted" th:text="${venta.cliente.email}">correo@cliente.com</small>
+                                <small class="d-block text-muted" th:if="${venta.direccionEntrega}" th:text="'📍 ' + ${venta.direccionEntrega}"></small>
+                            </td>
+                            
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    <i class="bi bi-wallet2 text-muted me-1"></i> 
+                                    <span th:text="${venta.metodoPago ?: 'Por Definir'}">Yape</span>
+                                </span>
+                            </td>
+                            
+                            <td class="fw-bold text-success" th:text="'S/ ' + ${#numbers.formatDecimal(venta.total, 1, 2)}">S/ 0.00</td>
+                            
+                            <td class="text-center">
+                                <form th:action="@{'/ventas/' + ${venta.id} + '/estado'}" method="POST" class="d-inline">
+                                    <select name="nuevoEstado" class="form-select form-select-sm border-0"
+                                            th:classappend="${venta.estado == 'CANCELADO'} ? 'text-danger' : (${venta.estado == 'ENTREGADO'} ? 'text-success' : 'text-dark')"
+                                            style="width: auto; display:inline-block;" onchange="confirmarCambioEstado(this)">
+                                        <option value="PENDIENTE" th:selected="${venta.estado == 'PENDIENTE'}">Pendiente</option>
+                                        <option value="ENVIADO" th:selected="${venta.estado == 'ENVIADO'}">Enviado</option>
+                                        <option value="ENTREGADO" th:selected="${venta.estado == 'ENTREGADO'}">Entregado</option>
+                                        <option value="CANCELADO" th:selected="${venta.estado == 'CANCELADO'}">Cancelado</option>
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+                        
+                        <tr th:if="${#lists.isEmpty(listaVentas)}">
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-receipt display-4 d-block mb-3 opacity-50"></i>
+                                Aún no hay ventas registradas en el sistema.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-3 px-2">
+                <span class="text-muted small" id="infoPaginaVentas"></span>
+                <div>
+                    <button class="btn btn-sm btn-outline-dark" onclick="cambiarPaginaVentas(-1)"><i class="bi bi-chevron-left"></i> Anterior</button>
+                    <button class="btn btn-sm btn-outline-dark" onclick="cambiarPaginaVentas(1)">Siguiente <i class="bi bi-chevron-right"></i></button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        function exportarExcel() {
+            // Capturamos la tabla por su ID
+            var tabla = document.getElementById("tablaVentas");
+            
+            // Usamos la librería para convertir el HTML en un libro de Excel
+            // Nota: exporta TODAS las filas de la tabla, sin importar la paginación visual de abajo.
+            var libro = XLSX.utils.table_to_book(tabla, {sheet: "Historial Ventas"});
+            
+            // Generamos y descargamos el archivo
+            XLSX.writeFile(libro, "Historial_Ventas_JVXF.xlsx");
+        }
+
+        // Paginación solo visual: no borra filas del DOM, por eso el export de arriba
+        // sigue incluyendo el historial completo aunque la pantalla muestre menos.
+        const TAMANO_PAGINA_VENTAS = 15;
+        let paginaActualVentas = 0;
+
+        function filtrarVentas() {
+            paginaActualVentas = 0; // al cambiar el filtro, volvemos a la primera página
+            actualizarPaginaVentas();
+        }
+
+        function actualizarPaginaVentas() {
+            const busqueda = document.getElementById('buscadorVentas').value.trim().toLowerCase();
+            const estadoSel = document.getElementById('filtroEstadoVentas').value;
+            const todasLasFilas = document.querySelectorAll('#cuerpoVentas .fila-venta');
+
+            // 1. Filtramos por texto (cliente/correo/N° de pedido) y por estado
+            const coincidentes = [];
+            todasLasFilas.forEach(fila => {
+                const cliente = (fila.getAttribute('data-cliente') || '').toLowerCase();
+                const pedido = (fila.getAttribute('data-pedido') || '');
+                const estado = fila.getAttribute('data-estado') || '';
+
+                const matchTexto = (busqueda === '' || cliente.includes(busqueda) || pedido.includes(busqueda));
+                const matchEstado = (estadoSel === 'todos' || estado === estadoSel);
+
+                if (matchTexto && matchEstado) coincidentes.push(fila);
+                else fila.style.display = 'none';
+            });
+
+            // 2. Paginamos solo dentro de lo que coincide con el filtro
+            const totalPaginas = Math.max(1, Math.ceil(coincidentes.length / TAMANO_PAGINA_VENTAS));
+            paginaActualVentas = Math.min(paginaActualVentas, totalPaginas - 1);
+            const inicio = paginaActualVentas * TAMANO_PAGINA_VENTAS;
+
+            coincidentes.forEach((fila, indice) => {
+                fila.style.display = (indice >= inicio && indice < inicio + TAMANO_PAGINA_VENTAS) ? '' : 'none';
+            });
+
+            document.getElementById('infoPaginaVentas').textContent =
+                coincidentes.length === 0 ? 'Sin resultados' : `Página ${paginaActualVentas + 1} de ${totalPaginas} (${coincidentes.length} ventas)`;
+        }
+
+        function cambiarPaginaVentas(delta) {
+            paginaActualVentas += delta;
+            if (paginaActualVentas < 0) paginaActualVentas = 0;
+            actualizarPaginaVentas();
+        }
+
+        actualizarPaginaVentas();
+
+        function confirmarCambioEstado(select) {
+            if (select.value === 'CANCELADO') {
+                if (!confirm('¿Cancelar este pedido? El stock de sus productos se devolverá automáticamente al inventario.')) {
+                    return; // el select ya cambió visualmente, pero no lo recargamos sin confirmar
+                }
+            }
+            select.form.submit();
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

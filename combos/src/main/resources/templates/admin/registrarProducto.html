@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Prenda - JVXF Boutique</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css?v=1.1}">
+    
+    <style>
+        .sidebar { width: 260px; height: 100vh; position: fixed; top: 0; left: 0; background-color: #2C1A17; border-right: 3px solid #B23A48; padding-top: 20px; z-index: 1000; }
+        .main-content { margin-left: 260px; padding: 40px; width: calc(100% - 260px); }
+        .sidebar .nav-link { color: #FCF9F2 !important; padding: 15px 25px; border-radius: 0; font-weight: 400; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { background-color: #B23A48; color: white !important; transform: none; }
+    </style>
+</head>
+<body class="bg-light">
+
+    <div class="sidebar">
+        <div class="text-center pb-4 mb-4 border-bottom" style="border-color: rgba(240, 213, 215, 0.2) !important;">
+            <h4 class="fw-bold mb-0 text-white" style="letter-spacing: 1px;">JVXF Panel</h4>
+            <small class="text-muted fw-bold">ADMINISTRADOR</small>
+        </div>
+        <ul class="nav flex-column fs-6">
+            <li class="nav-item"><a class="nav-link" th:href="@{/admin/dashboard}"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/productos}"><i class="bi bi-list-ul me-2"></i> Ver Inventario</a></li>
+            <li class="nav-item"><a class="nav-link active" th:href="@{/productos/nuevo}"><i class="bi bi-plus-circle me-2"></i> Registrar Ropa</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/ventas}"><i class="bi bi-receipt me-2"></i> Historial Ventas</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/clientes}"><i class="bi bi-people me-2"></i> Base Clientes</a></li>
+            <li class="nav-item mt-5 border-top" style="border-color: rgba(240, 213, 215, 0.2) !important;"><a class="nav-link text-warning" th:href="@{/}"><i class="bi bi-box-arrow-left"></i> Salir al Catálogo</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="mb-4">
+            <a th:href="@{/productos}" class="text-decoration-none text-muted fw-bold">
+                <i class="bi bi-arrow-left"></i> Volver al inventario
+            </a>
+            <h2 class="fw-bold mt-2" style="color: #422A26;" th:text="${producto.id == null ? 'Registrar Nueva Prenda' : 'Editar Prenda'}">Gestión de Ropa</h2>
+        </div>
+
+        <div th:if="${agregandoTallaDe}" class="alert alert-warning d-flex align-items-center gap-2 mb-4">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>Estás agregando una <strong>nueva talla</strong> para "<span th:text="${agregandoTallaDe}"></span>". Los demás campos ya vienen precargados; solo define la talla, el stock y (si quieres) una foto distinta para este modelado.</span>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm p-4 bg-white">
+                    <form th:action="@{/productos/guardar}" th:object="${producto}" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" th:field="*{id}">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nombre de la Prenda</label>
+                            <input type="text" class="form-control" th:field="*{nombre}" placeholder="Ej. Casaca de Cuero Vintage" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Descripción Corta</label>
+                            <textarea class="form-control" th:field="*{description}" rows="2" placeholder="Detalles..."></textarea>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Talla</label>
+                                <select class="form-select" th:field="*{talla}" required>
+                                    <option value="XS">XS</option><option value="S">S</option><option value="M">M</option>
+                                    <option value="L">L</option><option value="XL">XL</option><option value="Única">Única</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Precio (S/)</label>
+                                <input type="number" step="0.01" class="form-control" th:field="*{precio}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Stock</label>
+                                <input type="number" class="form-control" th:field="*{stock}" required>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Género</label>
+                                <select class="form-select" th:field="*{genero}" required>
+                                    <option value="Femenino">Femenino</option>
+                                    <option value="Masculino">Masculino</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Tipo de Prenda</label>
+                                <select class="form-select" th:field="*{tipo}" required>
+                                    <option value="Polos">Polos</option>
+                                    <option value="Pantalones">Pantalones</option>
+                                    <option value="Casacas">Casacas</option>
+                                    <option value="Sueteres">Suéteres</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold mb-3"><i class="bi bi-image me-2"></i> Imagen del Producto</h5>
+                        <div class="btn-group w-100 mb-3">
+                            <input type="radio" class="btn-check" name="tipoImagen" id="btnArchivo" value="btnArchivo" checked onchange="cambiarModoImagen()">
+                            <label class="btn btn-outline-dark" for="btnArchivo">Subir Archivo</label>
+                            <input type="radio" class="btn-check" name="tipoImagen" id="btnUrl" value="btnUrl" onchange="cambiarModoImagen()">
+                            <label class="btn btn-outline-dark" for="btnUrl">URL Externa</label>
+                        </div>
+
+                        <div id="divArchivo" class="mb-4"><input class="form-control" type="file" name="imagenArchivo" id="fileInput" onchange="previsualizarArchivo()"></div>
+                        <div id="divUrl" class="mb-4 d-none"><input type="url" class="form-control" name="imagenUrlTexto" id="imgInput" th:value="${producto.imagenUrl}" oninput="actualizarFoto()"></div>
+
+                        <div class="text-end d-flex justify-content-end gap-2">
+                            <button type="submit" name="accion" value="agregarTalla" class="btn btn-outline-dark fw-bold px-4">
+                                <i class="bi bi-plus-circle"></i> Guardar y agregar otra talla
+                            </button>
+                            <button type="submit" name="accion" value="guardar" class="btn btn-warning fw-bold px-4">Guardar Prenda</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm p-4 text-center">
+                    <img th:src="${producto.imagenUrl != null ? producto.imagenUrl : 'https://placehold.co/400x500?text=Sin+Foto'}" 
+                         id="imgPreview" class="img-fluid rounded" style="height: 350px; object-fit: cover;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function cambiarModoImagen() {
+            const btnArchivo = document.getElementById('btnArchivo').checked;
+            document.getElementById('divArchivo').classList.toggle('d-none', !btnArchivo);
+            document.getElementById('divUrl').classList.toggle('d-none', btnArchivo);
+        }
+        function actualizarFoto() { document.getElementById('imgPreview').src = document.getElementById('imgInput').value; }
+        function previsualizarArchivo() {
+            const file = document.getElementById('fileInput').files[0];
+            if (file) { const reader = new FileReader(); reader.onload = e => document.getElementById('imgPreview').src = e.target.result; reader.readAsDataURL(file); }
+        }
+    </script>
+</body>
+</html>

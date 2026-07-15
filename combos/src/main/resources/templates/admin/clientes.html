@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base de Clientes - JVXF Boutique</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    
+    <style>
+        .sidebar { width: 260px; height: 100vh; position: fixed; top: 0; left: 0; background-color: #2C1A17; border-right: 3px solid #B23A48; padding-top: 20px; z-index: 1000; }
+        .main-content { margin-left: 260px; padding: 40px; width: calc(100% - 260px); }
+        .sidebar .nav-link { color: #FCF9F2 !important; padding: 15px 25px; border-radius: 0; font-weight: 400; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { background-color: #B23A48; color: white !important; transform: none; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="text-center pb-4 mb-4 border-bottom" style="border-color: rgba(240, 213, 215, 0.2) !important;">
+            <h4 class="fw-bold mb-0 text-white" style="letter-spacing: 1px;">JVXF Panel</h4>
+            <small class="text-muted fw-bold">ADMINISTRADOR</small>
+        </div>
+        <ul class="nav flex-column fs-6">
+            <li class="nav-item"><a class="nav-link" th:href="@{/admin/dashboard}"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/productos}"><i class="bi bi-cloth-card me-2"></i> Ver Inventario</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/productos/nuevo}"><i class="bi bi-plus-circle me-2"></i> Registrar Ropa</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/ventas}"><i class="bi bi-receipt me-2"></i> Historial Ventas</a></li>
+            <li class="nav-item"><a class="nav-link active" th:href="@{/clientes}"><i class="bi bi-people me-2"></i> Base Clientes</a></li>
+            <li class="nav-item mt-5 border-top" style="border-color: rgba(240, 213, 215, 0.2) !important;"><a class="nav-link text-warning" th:href="@{/}"><i class="bi bi-box-arrow-left me-2"></i> Salir al Catálogo</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold" style="color: #422A26;">Directorio de Clientes</h2>
+                <p class="text-muted">Administra la información de contacto de tus compradores.</p>
+            </div>
+            <button class="btn btn-warning shadow-sm px-4" data-bs-toggle="modal" data-bs-target="#modalPromocion">
+                <i class="bi bi-envelope-paper-fill me-2"></i> Enviar Promociones
+            </button>
+        </div>
+
+        <div th:if="${mensajePromocion}" class="alert alert-success" th:text="${mensajePromocion}"></div>
+
+        <!-- Modal para redactar la promoción -->
+        <div class="modal fade" id="modalPromocion" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form th:action="@{/clientes/enviar-promocion}" method="POST">
+                        <div class="modal-header">
+                            <h5 class="modal-title fw-bold">Enviar promoción a todos tus clientes</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="text-muted small">
+                                Se enviará por correo a los <span th:text="${#lists.size(listaClientes)}">0</span> clientes registrados.
+                            </p>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Asunto</label>
+                                <input type="text" name="asunto" class="form-control" placeholder="Ej: ¡20% de descuento esta semana!" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Mensaje</label>
+                                <textarea name="mensaje" class="form-control" rows="5" placeholder="Escribe aquí tu promoción (puedes usar HTML simple, como &lt;b&gt;negrita&lt;/b&gt;)" required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-warning fw-bold">Enviar ahora</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm p-4 bg-white">
+            
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light text-muted small uppercase">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre Completo</th>
+                            <th>Correo Electrónico</th>
+                            <th>Tipo de Perfil</th>
+                            <th class="text-center">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoClientes">
+                        <tr th:each="cliente : ${listaClientes}" class="fila-cliente">
+                            <td class="fw-bold text-muted" th:text="${cliente.id}">1</td>
+                            
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-light rounded-circle d-flex justify-content-center align-items-center me-3" style="width: 40px; height: 40px; color: #B23A48;">
+                                        <i class="bi bi-person-fill fs-5"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-0" style="color: #422A26;" th:text="${cliente.nombre}">Nombre Apellido</h6>
+                                </div>
+                            </td>
+                            
+                            <td>
+                                <a th:href="'mailto:' + ${cliente.email}" class="text-decoration-none text-muted" th:text="${cliente.email}">correo@ejemplo.com</a>
+                            </td>
+                            
+                            <td>
+                                <span class="badge bg-secondary bg-opacity-10 text-dark border" th:text="${cliente.rol}">CLIENTE</span>
+                            </td>
+                            
+                            <td class="text-center">
+                                <span class="badge bg-success bg-opacity-10 text-success px-3 rounded-pill">Activo</span>
+                            </td>
+                        </tr>
+
+                        <tr th:if="${#lists.isEmpty(listaClientes)}">
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-people display-4 d-block mb-3 opacity-50"></i>
+                                Aún no tienes clientes registrados.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-3 px-2">
+                <span class="text-muted small" id="infoPaginaClientes"></span>
+                <div>
+                    <button class="btn btn-sm btn-outline-dark" onclick="cambiarPaginaClientes(-1)"><i class="bi bi-chevron-left"></i> Anterior</button>
+                    <button class="btn btn-sm btn-outline-dark" onclick="cambiarPaginaClientes(1)">Siguiente <i class="bi bi-chevron-right"></i></button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+        const TAMANO_PAGINA_CLIENTES = 15;
+        let paginaActualClientes = 0;
+
+        function actualizarPaginaClientes() {
+            const filas = document.querySelectorAll('#cuerpoClientes .fila-cliente');
+            const totalPaginas = Math.max(1, Math.ceil(filas.length / TAMANO_PAGINA_CLIENTES));
+            paginaActualClientes = Math.min(paginaActualClientes, totalPaginas - 1);
+
+            filas.forEach((fila, indice) => {
+                const inicio = paginaActualClientes * TAMANO_PAGINA_CLIENTES;
+                fila.style.display = (indice >= inicio && indice < inicio + TAMANO_PAGINA_CLIENTES) ? '' : 'none';
+            });
+
+            document.getElementById('infoPaginaClientes').textContent =
+                filas.length === 0 ? '' : `Página ${paginaActualClientes + 1} de ${totalPaginas} (${filas.length} clientes)`;
+        }
+
+        function cambiarPaginaClientes(delta) {
+            paginaActualClientes += delta;
+            if (paginaActualClientes < 0) paginaActualClientes = 0;
+            actualizarPaginaClientes();
+        }
+
+        actualizarPaginaClientes();
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

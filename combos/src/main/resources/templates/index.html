@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JVXF Boutique | Estilo y Elegancia</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+
+<body>
+
+<nav class="navbar fixed-top py-3 border-bottom">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a class="navbar-brand m-0" th:href="@{/}">
+            JVXF <span style="font-weight: 300;">BOUTIQUE</span>
+        </a>
+        
+        <button class="navbar-toggler border-0 shadow-none d-flex align-items-center" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuLateral">
+            <span class="me-2 d-none d-sm-block brand-text" style="font-size: 0.9rem; letter-spacing: 2px; font-weight:600; color: #422A26;">MENÚ</span>
+            <i class="bi bi-list fs-2 text-dark"></i>
+        </button>
+    </div>
+</nav>
+
+<div class="offcanvas offcanvas-end" id="menuLateral">
+    <div class="offcanvas-header pt-4 px-4 border-bottom-0">
+        <h5 class="offcanvas-title fw-bold" style="color: #B23A48; font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; letter-spacing: 2px;">NAVEGACIÓN</h5>
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column py-5">
+        <ul class="navbar-nav w-100 mb-auto">
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/}">INICIO <i class="bi bi-arrow-right"></i></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/catalogo}">CATÁLOGO <i class="bi bi-arrow-right"></i></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/carrito/ver}">CARRITO <i class="bi bi-arrow-right"></i></a>
+            </li>
+            <li class="nav-item" th:if="${nombreClienteSesion}">
+                <a class="nav-link" th:href="@{/perfil}" th:text="'MI CUENTA (' + ${nombreClienteSesion} + ') '"><i class="bi bi-arrow-right"></i></a>
+            </li>
+            <li class="nav-item" th:if="${nombreClienteSesion}">
+                <a class="nav-link" th:href="@{/favoritos}">FAVORITOS <i class="bi bi-arrow-right"></i></a>
+            </li>
+            <li class="nav-item" th:unless="${nombreClienteSesion}">
+                <a class="nav-link" th:href="@{/login}">INICIAR SESIÓN <i class="bi bi-arrow-right"></i></a>
+            </li>
+            <li class="nav-item mt-5">
+                <a class="nav-link text-danger admin-link" th:href="@{/admin/login}">
+                    <i class="bi bi-key-fill me-2" style="transform:none; opacity:1;"></i>PANEL ADMIN
+                </a>
+            </li>
+        </ul>
+        <div class="text-center pt-4" style="border-top: 1px solid rgba(66, 42, 38, 0.1);">
+            <a href="#" class="text-dark mx-2 fs-5 hover-danger"><i class="bi bi-instagram"></i></a>
+            <a href="#" class="text-dark mx-2 fs-5 hover-danger"><i class="bi bi-pinterest"></i></a>
+            <a href="#" class="text-dark mx-2 fs-5 hover-danger"><i class="bi bi-facebook"></i></a>
+        </div>
+    </div>
+</div>
+
+<section class="hero-carousel-section">
+    <div id="heroCarousel" class="carousel slide carousel-fade h-100" data-bs-ride="carousel" data-bs-interval="6000">
+        
+        <div class="carousel-indicators custom-indicators mb-4">
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+        </div>
+        
+        <div class="carousel-inner h-100">
+            <div class="carousel-item active h-100">
+                <img src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=1200&q=80" class="d-block w-100 h-100 object-fit-cover ken-burns" alt="Moda Elegante">
+                <div class="carousel-overlay"></div>
+                <div class="carousel-caption d-flex flex-column justify-content-center h-100 top-0 text-center">
+                    <h1 class="display-1 text-uppercase mb-3 hero-title text-white">JVXF Boutique</h1>
+                    <p class="fs-3 mb-5 hero-subtitle text-white">Elegancia, estilo y personalidad.</p>
+                    <div>
+                        <a th:href="@{/catalogo}" class="btn btn-luxury btn-lg px-5 py-3">EXPLORAR COLECCIÓN</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="carousel-item h-100">
+                <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1200&auto=format&fit=crop" class="d-block w-100 h-100 object-fit-cover ken-burns" alt="Nueva Colección">
+                <div class="carousel-overlay"></div>
+                <div class="carousel-caption d-flex flex-column justify-content-center h-100 top-0 text-center">
+                    <h1 class="display-1 text-uppercase mb-3 hero-title text-white">Alta Costura</h1>
+                    <p class="fs-3 mb-5 hero-subtitle text-white">Vanguardia en cada detalle de tu outfit.</p>
+                    <div>
+                        <a th:href="@{/catalogo}" class="btn btn-luxury btn-lg px-5 py-3">VER NOVEDADES</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="carousel-item h-100">
+                <img src="https://images.unsplash.com/photo-1485968579580-b6d095142e6e?q=80&w=1200&auto=format&fit=crop" class="d-block w-100 h-100 object-fit-cover ken-burns" alt="Estilo Urbano">
+                <div class="carousel-overlay"></div>
+                <div class="carousel-caption d-flex flex-column justify-content-center h-100 top-0 text-center">
+                    <h1 class="display-1 text-uppercase mb-3 hero-title text-white">Estilo Único</h1>
+                    <p class="fs-3 mb-5 hero-subtitle text-white">Diseños exclusivos que definen tu esencia.</p>
+                    <div>
+                        <a th:href="@{/catalogo}" class="btn btn-luxury btn-lg px-5 py-3">DESCUBRIR MÁS</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon shadow-sm" aria-hidden="true"></span>
+            <span class="visually-hidden">Anterior</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon shadow-sm" aria-hidden="true"></span>
+            <span class="visually-hidden">Siguiente</span>
+        </button>
+    </div>
+</section>
+
+<section class="container-fluid py-4" style="background-color: #FCF9F2; border-top: 1px solid rgba(66,42,38,0.08); border-bottom: 1px solid rgba(66,42,38,0.08);">
+    <div class="container">
+        <div class="row g-4 text-center">
+            <div class="col-6 col-md-3">
+                <i class="bi bi-truck fs-3" style="color:#B23A48;"></i>
+                <p class="small fw-bold mb-0 mt-2" style="color:#422A26;">Envío a todo el país</p>
+            </div>
+            <div class="col-6 col-md-3">
+                <i class="bi bi-arrow-repeat fs-3" style="color:#B23A48;"></i>
+                <p class="small fw-bold mb-0 mt-2" style="color:#422A26;">Cambios sin costo</p>
+            </div>
+            <div class="col-6 col-md-3">
+                <i class="bi bi-shield-check fs-3" style="color:#B23A48;"></i>
+                <p class="small fw-bold mb-0 mt-2" style="color:#422A26;">Pago 100% seguro</p>
+            </div>
+            <div class="col-6 col-md-3">
+                <i class="bi bi-headset fs-3" style="color:#B23A48;"></i>
+                <p class="small fw-bold mb-0 mt-2" style="color:#422A26;">Asistente siempre disponible</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container py-5 text-center">
+    <h3 class="fw-bold mb-4" style="font-family: 'Cormorant Garamond', serif; color: #2C1A17;">Compra por Categoría</h3>
+    <div class="d-flex flex-wrap justify-content-center gap-3">
+        <a th:href="@{/catalogo(tipo='polo')}" class="btn btn-outline-dark rounded-pill px-4 py-2">Polos</a>
+        <a th:href="@{/catalogo(tipo='pantalon')}" class="btn btn-outline-dark rounded-pill px-4 py-2">Pantalones</a>
+        <a th:href="@{/catalogo(tipo='casaca')}" class="btn btn-outline-dark rounded-pill px-4 py-2">Casacas</a>
+        <a th:href="@{/catalogo(tipo='sueter')}" class="btn btn-outline-dark rounded-pill px-4 py-2">Suéteres</a>
+    </div>
+</section>
+
+<section class="container py-5 my-5 text-center">
+    <div class="mb-5">
+        <h2 class="display-5 fw-bold" style="font-family: 'Cormorant Garamond', serif; color: #2C1A17;">Tendencias Destacadas</h2>
+        <div class="mx-auto mt-3" style="width: 50px; height: 2px; background-color: #B23A48;"></div>
+    </div>
+    
+    <div class="row g-4 px-2">
+        <div class="col-md-4">
+            <div class="card card-luxury border-0">
+                <div class="card-img-wrapper">
+                    <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=600&auto=format&fit=crop" alt="Moda Exclusiva">
+                </div>
+                <div class="card-luxury-body">
+                    <h5 class="fw-bold">Moda Exclusiva</h5>
+                    <a th:href="@{/catalogo}" class="card-luxury-link">Ver Diseños</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card card-luxury border-0">
+                <div class="card-img-wrapper">
+                    <img src="https://images.unsplash.com/photo-1485968579580-b6d095142e6e?q=80&w=600&auto=format&fit=crop" alt="Elegancia Premium">
+                </div>
+                <div class="card-luxury-body">
+                    <h5 class="fw-bold">Elegancia Premium</h5>
+                    <a th:href="@{/catalogo}" class="card-luxury-link">Descubrir más</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card card-luxury border-0">
+                <div class="card-img-wrapper">
+                    <img src="https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=600&auto=format&fit=crop" alt="Estilo Urbano">
+                </div>
+                <div class="card-luxury-body">
+                    <h5 class="fw-bold">Estilo Urbano</h5>
+                    <a th:href="@{/catalogo}" class="card-luxury-link">Explorar Ropa</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="pt-5 pb-4 mt-auto" style="background-color: #2C1A17; color: #FCF9F2;">
+    <div class="container">
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <p class="fs-4 mb-2" style="font-family: 'Cormorant Garamond', serif; letter-spacing: 2px;">JVXF BOUTIQUE</p>
+                <p class="small opacity-75">Moda con estilo y personalidad, para cada ocasión.</p>
+                <div class="mt-3">
+                    <a href="#" class="text-white me-3 fs-5"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="text-white me-3 fs-5"><i class="bi bi-pinterest"></i></a>
+                    <a href="#" class="text-white fs-5"><i class="bi bi-facebook"></i></a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <p class="fw-bold small text-uppercase mb-3" style="letter-spacing: 1px;">Enlaces</p>
+                <ul class="list-unstyled small">
+                    <li class="mb-2"><a th:href="@{/catalogo}" class="text-white-50 text-decoration-none">Catálogo</a></li>
+                    <li class="mb-2"><a th:href="@{/carrito/ver}" class="text-white-50 text-decoration-none">Mi Carrito</a></li>
+                    <li class="mb-2"><a th:href="@{/registro}" class="text-white-50 text-decoration-none">Crear cuenta</a></li>
+                    <li class="mb-2"><a th:href="@{/mis-pedidos}" class="text-white-50 text-decoration-none">Mis pedidos</a></li>
+                    <li class="mb-2"><a th:href="@{/favoritos}" class="text-white-50 text-decoration-none">Mis favoritos</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <p class="fw-bold small text-uppercase mb-3" style="letter-spacing: 1px;">Contacto</p>
+                <ul class="list-unstyled small opacity-75">
+                    <li class="mb-2"><i class="bi bi-envelope me-2"></i>hola@jvxfboutique.com</li>
+                    <li class="mb-2"><i class="bi bi-whatsapp me-2"></i>+51 900 000 000</li>
+                    <li class="mb-2"><i class="bi bi-geo-alt me-2"></i>Lima, Perú</li>
+                </ul>
+            </div>
+        </div>
+        <div class="text-center pt-3 border-top" style="border-color: rgba(255,255,255,0.1) !important;">
+            <p class="mb-0 small opacity-50">© 2026 JVXF Boutique - Todos los derechos reservados</p>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
